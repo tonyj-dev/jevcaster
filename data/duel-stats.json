@@ -1,0 +1,16 @@
+{
+  "since": "2026-09-28T02:03:26.996Z",
+  "activeMs": 0,
+  "spend": {
+    "player": {
+      "requests": 0,
+      "tokens": 0,
+      "dollars": 0
+    },
+    "rival": {
+      "requests": 0,
+      "tokens": 0,
+      "dollars": 0
+    }
+  }
+}

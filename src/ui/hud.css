@@ -1,0 +1,208 @@
+:root {
+  --hud-font: "Cinzel", "Trajan Pro", Georgia, serif;
+  --hud-title: "Cinzel Decorative", "Cinzel", Georgia, serif;
+  --hud-mono: ui-monospace, Consolas, monospace;
+  --warlock-color: #b07cff;
+  --demon-color: #e0223a;
+  --bone: #d8cbb0;
+  --bone-dim: #8f8270;
+  --iron: #4a3a30;
+  --ink: #0a0506;
+}
+
+html, body { margin: 0; height: 100%; overflow: hidden; background: #030102; }
+#game { position: fixed; inset: 0; cursor: crosshair; }
+#game canvas { display: block; }
+#overlay { position: fixed; inset: 0; pointer-events: none; font-family: var(--hud-font); font-variant-ligatures: none; color: var(--bone); user-select: none; }
+
+/* Health: iron-framed vials of blood (the demon) and witch-light (you). */
+.hud-top {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 26px; width: min(940px, 92vw);
+}
+.health-label { font-size: 14px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 7px; text-shadow: 0 1px 0 #000, 0 0 10px rgba(0, 0, 0, 0.9); }
+.health-demon { text-align: right; }
+.health-track {
+  position: relative; height: 14px; overflow: hidden; background: linear-gradient(180deg, #050203, #140a0b);
+  border: 1px solid #000;
+  box-shadow: 0 0 0 2px #241a18, 0 0 0 3px var(--iron), 0 4px 14px rgba(0, 0, 0, 0.9), inset 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+.health-fill, .health-trailing { position: absolute; top: 0; bottom: 0; }
+.health-warlock .health-fill, .health-warlock .health-trailing { left: 0; }
+.health-demon .health-fill, .health-demon .health-trailing { right: 0; }
+.health-fill { transition: width 60ms linear; }
+.health-trailing { background: rgba(236, 222, 196, 0.7); transition: width 500ms ease-in 250ms; }
+.health-warlock .health-fill {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 45%, rgba(0, 0, 0, 0.35)), linear-gradient(90deg, #2a0c52, #7a3fd0 70%, var(--warlock-color));
+  box-shadow: 0 0 14px rgba(176, 124, 255, 0.65);
+}
+.health-demon .health-fill {
+  background: linear-gradient(180deg, rgba(255, 220, 200, 0.28), transparent 45%, rgba(0, 0, 0, 0.35)), linear-gradient(270deg, #3a0006, #a00c1c 70%, var(--demon-color));
+  box-shadow: 0 0 14px rgba(224, 34, 58, 0.7);
+}
+/* Round wins are marked with inverted stars. */
+.round-pips { display: flex; gap: 7px; margin-top: 9px; }
+.health-demon .round-pips { justify-content: flex-end; }
+.pip {
+  width: 15px; height: 15px; background: rgba(216, 203, 176, 0.16); transform: rotate(180deg);
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+.health-warlock .pip.won { background: var(--warlock-color); }
+.health-demon .pip.won { background: var(--demon-color); }
+.round-label {
+  font: 700 17px var(--hud-title); letter-spacing: 0.16em; text-transform: uppercase; padding-top: 14px; color: #efe0c4;
+  text-shadow: 0 0 12px rgba(255, 30, 40, 0.8), 0 1px 0 #000; display: flex; align-items: center; gap: 10px;
+}
+.hud-center { display: flex; flex-direction: column; align-items: center; }
+.match-score { display: none; align-items: baseline; gap: 10px; margin-top: 4px; font: 700 15px var(--hud-title); font-variant-numeric: tabular-nums; text-shadow: 0 1px 0 #000, 0 0 8px rgba(0, 0, 0, 0.9); }
+.match-score.visible { display: flex; }
+.match-wins.warlock { color: var(--warlock-color); }
+.match-wins.demon { color: var(--demon-color); }
+.match-score-label { font: 9px var(--hud-mono); letter-spacing: 0.14em; text-transform: uppercase; color: #8f7f70; }
+.round-label::before, .round-label::after { content: ""; width: 26px; height: 1px; background: linear-gradient(90deg, transparent, #a01822, transparent); }
+
+/* Spell slots: carved stone tablets. */
+.hud-bottom { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; }
+.slot {
+  position: relative; width: 96px; height: 72px; overflow: hidden; border-radius: 2px;
+  background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--slot-color) 14%, transparent), transparent 70%), linear-gradient(180deg, #1c1315, #090506);
+  border: 1px solid color-mix(in srgb, var(--slot-color) 30%, var(--iron));
+  box-shadow: inset 0 0 0 1px #000, inset 0 0 12px rgba(0, 0, 0, 0.9), 0 6px 16px rgba(0, 0, 0, 0.85);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  transition: transform 120ms ease-out;
+}
+.slot.ready { border-color: color-mix(in srgb, var(--slot-color) 70%, var(--iron)); box-shadow: inset 0 0 0 1px #000, inset 0 0 12px rgba(0, 0, 0, 0.9), 0 0 14px color-mix(in srgb, var(--slot-color) 40%, transparent); }
+.slot.selected {
+  transform: translateY(-7px); border-color: var(--slot-color);
+  box-shadow: inset 0 0 0 1px #000, inset 0 0 16px color-mix(in srgb, var(--slot-color) 35%, transparent), 0 0 20px color-mix(in srgb, var(--slot-color) 65%, transparent);
+}
+.slot.active { background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--slot-color) 30%, transparent), transparent 80%), linear-gradient(180deg, #1c1315, #090506); }
+.slot-key { font-family: var(--hud-mono); font-size: 10px; color: var(--bone-dim); }
+.slot-name { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; white-space: nowrap; color: var(--slot-color); text-shadow: 0 0 8px color-mix(in srgb, var(--slot-color) 50%, transparent), 0 1px 0 #000; }
+.slot-cost { font-size: 10px; color: var(--bone-dim); min-height: 12px; }
+.slot-edge { font-size: 9px; letter-spacing: 0.04em; color: color-mix(in srgb, var(--slot-color) 55%, var(--bone)); opacity: 0.8; }
+.slot-edge:empty { display: none; }
+.slot-cooldown { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(40, 0, 4, 0.75), rgba(0, 0, 0, 0.75)); }
+.slot-timer {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;
+  font: 700 22px var(--hud-font); color: #f2e6d0; text-shadow: 0 0 6px rgba(0, 0, 0, 0.95), 0 0 14px rgba(160, 0, 10, 0.9);
+}
+.slot.denied { animation: slot-denied 260ms ease-out; }
+@keyframes slot-denied {
+  0% { box-shadow: inset 0 0 0 1px #000, 0 0 0 2px #ff2a2a, 0 0 18px #ff2a2a; translate: 0 0; }
+  30% { translate: -3px 0; }
+  60% { translate: 3px 0; }
+  100% { translate: 0 0; }
+}
+.slot-divider { width: 1px; background: linear-gradient(180deg, transparent, #6a1a20, transparent); margin: 4px 5px; }
+
+.banner {
+  position: absolute; top: 33%; left: 50%; transform: translate(-50%, -50%) scale(0.96);
+  text-align: center; opacity: 0; transition: opacity 250ms, transform 250ms;
+}
+.banner.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.banner-title {
+  font: 700 54px var(--hud-font); letter-spacing: 0.08em; color: #f0e2c8; white-space: nowrap; font-variant-ligatures: none;
+  text-shadow: 0 2px 0 #000, 0 0 18px rgba(255, 24, 36, 0.95), 0 0 46px rgba(150, 0, 10, 0.85);
+}
+.banner-title::after { content: ""; display: block; height: 1px; margin: 8px auto 0; width: 70%; background: linear-gradient(90deg, transparent, #c01822, transparent); }
+.banner-subtitle { font-size: 17px; letter-spacing: 0.34em; text-transform: uppercase; color: #c9a27a; margin-top: 10px; text-shadow: 0 1px 0 #000, 0 0 10px rgba(0, 0, 0, 0.9); }
+
+.paused {
+  position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(20, 2, 4, 0.55), rgba(3, 1, 2, 0.85));
+  font: 700 26px var(--hud-title); letter-spacing: 0.18em; text-transform: uppercase; color: #e8d6b8;
+  text-shadow: 0 0 16px rgba(200, 20, 30, 0.8);
+}
+.paused.visible { display: flex; }
+
+/* Jev can't be reached: a draining mana vial and a note under the round label. */
+.mana-out {
+  position: absolute; top: 86px; left: 50%; display: none; align-items: center; gap: 12px; padding: 9px 18px 9px 13px;
+  transform: translateX(-50%); background: rgba(8, 7, 18, 0.82); border: 1px solid #34437a; border-radius: 4px;
+  box-shadow: 0 0 20px rgba(60, 110, 230, 0.25), inset 0 0 12px rgba(40, 70, 160, 0.2);
+}
+.mana-out.visible { display: flex; animation: mana-in 0.4s ease-out; }
+.mana-title { font: 700 15px var(--hud-title); letter-spacing: 0.12em; text-transform: uppercase; color: #a3bbff; text-shadow: 0 0 10px rgba(70, 120, 255, 0.7); }
+.mana-line { margin-top: 3px; font: 12px var(--hud-font); color: #a99db9; }
+.mana-vial {
+  position: relative; flex: none; width: 16px; height: 24px; border: 2px solid #8090bb; border-radius: 3px 3px 9px 9px;
+  overflow: hidden; box-shadow: 0 0 8px rgba(90, 130, 255, 0.35);
+}
+.mana-vial::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 20%;
+  background: linear-gradient(#6f98ff, #2a47a8); animation: mana-drain 2.6s ease-in-out infinite;
+}
+@keyframes mana-drain { 0%, 100% { height: 22%; } 55% { height: 5%; } }
+@keyframes mana-in { from { opacity: 0; transform: translate(-50%, -6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+.frame-stats { position: absolute; top: 8px; right: 10px; font: 11px var(--hud-mono); color: #6e6056; }
+#brain-status { position: fixed; left: 12px; bottom: 10px; font: 12px/1.4 var(--hud-mono); color: #8f7f70; pointer-events: none; }
+.controls-hint { position: absolute; right: 12px; bottom: 10px; font: 11px/1.5 var(--hud-mono); color: #5e5048; text-align: right; }
+
+.damage-number {
+  position: absolute; left: 0; top: 0; font-weight: 700; font-size: 18px; will-change: transform, opacity;
+  text-shadow: 0 1px 0 #000, 0 0 6px rgba(0, 0, 0, 0.95), 0 0 14px rgba(220, 20, 30, 0.6);
+}
+.damage-number-big { font-size: 26px; }
+
+/* The Live panel and the inspector, stacked and centred vertically on the left edge, clear of the health bars. */
+.side-column {
+  position: absolute; left: 12px; top: 96px; bottom: 60px;
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 8px;
+}
+/* Fixed height, so its changing figures don't move the column; it still shrinks on short screens. */
+.inspector {
+  width: 340px; height: 700px; min-height: 0; overflow-y: auto; scrollbar-gutter: stable; display: none;
+  padding: 10px 12px; border: 1px solid rgba(160, 40, 50, 0.45); border-radius: 2px; background: rgba(10, 4, 6, 0.9);
+  font: 11px/1.45 var(--hud-mono); color: #d8cbb0; pointer-events: auto; user-select: text;
+}
+.inspector.visible { display: block; }
+.inspector-header { display: flex; align-items: center; gap: 8px; }
+.inspector-title { font: 700 12px var(--hud-font); letter-spacing: 0.08em; text-transform: uppercase; color: #d0505a; }
+.inspector-tabs { display: flex; gap: 4px; margin-left: auto; }
+.inspector-tabs.single .inspector-tab:not(.active) { display: none; }
+.inspector button {
+  font: 10px var(--hud-mono); color: #a08f80; background: rgba(255, 255, 255, 0.04); cursor: pointer;
+  border: 1px solid rgba(160, 40, 50, 0.45); border-radius: 2px; padding: 2px 6px;
+}
+.inspector button:hover { color: #efe4d0; }
+.inspector .inspector-tab.active { color: #fff; background: #9a1c2a; }
+.inspector .inspector-close { padding: 0 6px; font-size: 13px; line-height: 16px; }
+.inspector-open {
+  display: none; pointer-events: auto; cursor: pointer;
+  padding: 4px 10px; font: 700 11px var(--hud-font); letter-spacing: 0.08em; text-transform: uppercase;
+  color: #d0505a; background: rgba(10, 4, 6, 0.9); border: 1px solid rgba(160, 40, 50, 0.45); border-radius: 2px;
+}
+.inspector-open.visible { display: block; }
+.inspector-mode { margin: 4px 0 6px; font-weight: 700; color: #b8f0c8; }
+.inspector-mode.fallback { color: #ffc75a; }
+.inspector-latency { display: flex; flex-direction: column; gap: 2px; margin-top: 10px; }
+.inspector-sparkline { width: 100%; height: 34px; background: rgba(255, 255, 255, 0.03); }
+.inspector-stats { white-space: pre-wrap; margin-top: 4px; }
+.inspector-section { margin-top: 8px; color: #d0505a; text-transform: uppercase; letter-spacing: 0.06em; }
+.inspector-question { margin-top: 5px; }
+.inspector-question-heading { display: flex; justify-content: space-between; color: #efe4d0; }
+.inspector-dim { color: #8a7a70; }
+.inspector-bar { display: grid; grid-template-columns: 150px 1fr 34px; gap: 6px; align-items: center; color: #a08f80; }
+.inspector-bar.picked { color: #fff; font-weight: 700; }
+.inspector-bar.not-offered { opacity: 0.35; }
+.inspector-bar-track { height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 3px; overflow: hidden; }
+.inspector-bar-fill { display: block; height: 100%; background: #9a1c2a; }
+.inspector-bar.picked .inspector-bar-fill { background: #ffc75a; }
+.inspector-bar-value { text-align: right; }
+.inspector-details { margin-top: 6px; }
+.inspector-details summary { cursor: pointer; color: #d0505a; }
+.inspector-details pre { margin: 4px 0 0; max-height: 260px; overflow: auto; font-size: 10px; color: #b8a898; }
+
+/* Jev vs Jev: running time and total spend of the shared duel. */
+.live-stats {
+  max-width: 300px; pointer-events: none;
+  padding: 4px 8px 5px; background: rgba(10, 4, 6, 0.72); border: 1px solid #3a2420; border-radius: 2px;
+}
+.live-stats-status { font: 9px var(--hud-mono); letter-spacing: 0.14em; text-transform: uppercase; color: #ff4a52; text-shadow: 0 0 8px rgba(255, 30, 40, 0.7); }
+.live-stats.offline .live-stats-status { color: #8f7f70; text-shadow: none; }
+.live-stats-figures { display: flex; align-items: baseline; gap: 10px; margin-top: 2px; }
+.live-stats-runtime { font: 700 12px var(--hud-title); letter-spacing: 0.06em; color: #efe0c4; font-variant-numeric: tabular-nums; }
+.live-stats-cost { font: 700 11px var(--hud-title); letter-spacing: 0.04em; color: #ffc46a; font-variant-numeric: tabular-nums; }
+.live-stats-detail { font: 9px/1.4 var(--hud-mono); color: #7f7064; margin-top: 2px; white-space: pre-line; }

@@ -1,0 +1,140 @@
+{
+  "name": "duel-probe-2",
+  "source": "recorded",
+  "recordedAt": "2026-09-28T17:27:30.956Z",
+  "request": {
+    "kind": "probe",
+    "state": {
+      "warlock": {
+        "health": "hurt",
+        "carrying": "fire",
+        "cloak": "no cloak up",
+        "movement": "strafing to their left",
+        "status": "normal",
+        "openings": "just cast, so it can't cast again yet"
+      },
+      "demon": {
+        "health": "healthy",
+        "carrying": "frost",
+        "canCast": "now (frost)",
+        "onCooldown": [
+          "earth"
+        ],
+        "cloak": "no cloak up",
+        "position": "near the edge",
+        "openSides": "left is open; right is near the arena edge"
+      },
+      "between": {
+        "distance": "mid",
+        "warlockAim": "straight at the demon",
+        "incomingToDemon": [
+          {
+            "element": "fire",
+            "arrives": "in about half a second",
+            "cloakCanBlock": "yes, if it cloaks now (switching to fire costs no time)"
+          }
+        ]
+      },
+      "counters": {
+        "warlockWeakTo": "earth",
+        "demonHasWarlockWeaknessReady": "no",
+        "riskyForDemonToCarry": "frost",
+        "warlockCloakBlocks": "nothing"
+      },
+      "round": "round 2 of 5; warlock leads 1–0; demon ahead on health"
+    },
+    "questions": {
+      "demon_move": {
+        "type": "choice",
+        "instructions": "How should the demon move next? Keep away from the edge, where dodges run out.",
+        "criteria": {
+          "advance": "Walk toward the warlock. Right when `between.distance` is far, or `round` says the demon is ahead on health, or `warlock.health` is critical.",
+          "back_off": "Walk away from the warlock. Right when `between.distance` is close, `demon.health` is critical, or most spells are in `demon.onCooldown`. Wrong when `demon.position` is near the edge.",
+          "strafe_left": "Sidestep to the demon's left. Right when `between.warlockAim` is straight at or near the demon, or something is in `between.incomingToDemon`, and `demon.openSides` says left is open.",
+          "strafe_right": "Sidestep to the demon's right. Right when `between.warlockAim` is straight at or near the demon, or something is in `between.incomingToDemon`, and `demon.openSides` says right is open.",
+          "hold": "Stand still. Right when `between.distance` is mid and nothing is incoming, or while a cloak that blocks what is incoming is up."
+        }
+      },
+      "demon_spell": {
+        "type": "choice",
+        "instructions": "Which spell should the demon carry? It casts only the carried spell, and its cloak blocks only that element. Fire beats frost, frost beats earth, earth beats fire: an attack hits 1.5× harder on a mage carrying what it beats (`counters` works this out).",
+        "criteria": {
+          "fire": "Carry fire: a slow orb whose splash and burn still catch a late dodge. Right when `counters.warlockWeakTo` is fire and fire is ready, or to cloak against incoming fire. Wrong when `counters.riskyForDemonToCarry` is fire, unless cloaking. Wrong for casting when `counters.warlockCloakBlocks` is fire.",
+          "frost": "Carry frost: the fastest shot; a hit freezes the warlock for about a second, long enough for an earthspike to land. Right when `counters.warlockWeakTo` is frost and frost is ready, or to cloak against incoming frost. Wrong when `counters.riskyForDemonToCarry` is frost, unless cloaking. Wrong for casting when `counters.warlockCloakBlocks` is frost.",
+          "earth": "Carry earth: the heaviest hit, along a line after a short charge that roots the demon; best when the warlock is frozen, rooted or standing still. Right when `counters.warlockWeakTo` is earth and earth is ready, or to cloak against incoming earth. Wrong when `counters.riskyForDemonToCarry` is earth, unless cloaking. Wrong for casting when `counters.warlockCloakBlocks` is earth."
+        }
+      },
+      "demon_act": {
+        "type": "choice",
+        "instructions": "You control `demon`, a mage dueling `warlock` in a round arena; a round is won by bringing the other to zero health (`round` has the score). What should the demon do right now? A dash keeps a raised cloak up and breaks off an earthspike charge.",
+        "criteria": {
+          "cast": "Cast at the warlock. Right when `demon.canCast` starts with now or in a moment and nothing in `between.incomingToDemon` is imminent. Best when `warlock.openings` is not none, `warlock.status` says frozen or rooted, or `counters.demonHasWarlockWeaknessReady` is yes. A warlock cloak is an opening, not a reason to hold back: it stops only `counters.warlockCloakBlocks` and the warlock can't cast behind it. Wrong when `counters.warlockCloakBlocks` is the spell named in `demon.canCast`.",
+          "cloak": "Raise the cloak and hold it. Right when an item in `between.incomingToDemon` has `cloakCanBlock` starting with yes. Also right before a shot, when `between.warlockAim` is straight at the demon and `warlock.carrying` is frost (too fast to cloak after the cast); the cloak then guards against `warlock.carrying`. Wrong when every incoming item says too late.",
+          "dash_left": "Dash to the demon's left. Right when an item in `between.incomingToDemon` arrives imminent or in about half a second and its `cloakCanBlock` does not start with yes, and `demon.openSides` says left is open.",
+          "wait": "Keep moving, don't cast. Right when nothing is incoming and `demon.canCast` does not start with now."
+        }
+      },
+      "demon_aim": {
+        "type": "choice",
+        "instructions": "If the demon casts now, where should it aim?",
+        "criteria": {
+          "straight_at_warlock": "Aim where the warlock is now. Right when `warlock.movement` is standing still or `warlock.status` says rooted or frozen.",
+          "lead_warlock_movement": "Aim ahead of the warlock. Right when `warlock.movement` is walking, strafing or dashing."
+        }
+      }
+    }
+  },
+  "response": {
+    "ok": true,
+    "model": "jev-1.13.0",
+    "answers": {
+      "demon_move": {
+        "type": "choice",
+        "choice": "strafe_left",
+        "probabilities": {
+          "strafe_right": 0.01,
+          "strafe_left": 0.83,
+          "back_off": 0.02,
+          "advance": 0.14,
+          "hold": 0
+        },
+        "confidence": 0.79
+      },
+      "demon_spell": {
+        "type": "choice",
+        "choice": "fire",
+        "probabilities": {
+          "fire": 0.48,
+          "earth": 0.26,
+          "frost": 0.26
+        },
+        "confidence": 0.22
+      },
+      "demon_act": {
+        "type": "choice",
+        "choice": "cloak",
+        "probabilities": {
+          "wait": 0,
+          "dash_left": 0.04,
+          "cast": 0.09,
+          "cloak": 0.87
+        },
+        "confidence": 0.83
+      },
+      "demon_aim": {
+        "type": "choice",
+        "choice": "lead_warlock_movement",
+        "probabilities": {
+          "straight_at_warlock": 0.01,
+          "lead_warlock_movement": 0.99
+        },
+        "confidence": 0.97
+      }
+    },
+    "usage": {
+      "inputTokens": 1865,
+      "outputTokens": 189
+    },
+    "latencyMs": 172.9266
+  }
+}

@@ -1,0 +1,86 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`tick questions > matches the snapshot of the probe request 1`] = `
+{
+  "kind": "tick",
+  "questions": {
+    "demon_act": {
+      "criteria": {
+        "cast": "Cast at the warlock. Right when \`demon.canCast\` starts with now or in a moment and nothing in \`between.incomingToDemon\` is imminent. Best when \`warlock.openings\` is not none, \`warlock.status\` says frozen or rooted, or \`counters.demonHasWarlockWeaknessReady\` is yes. A warlock cloak is an opening, not a reason to hold back: it stops only \`counters.warlockCloakBlocks\` and the warlock can't cast behind it. Wrong when \`counters.warlockCloakBlocks\` is the spell named in \`demon.canCast\`.",
+        "cloak": "Raise the cloak and hold it. Right when an item in \`between.incomingToDemon\` has \`cloakCanBlock\` starting with yes. Also right before a shot, when \`between.warlockAim\` is straight at the demon and \`warlock.carrying\` is frost (too fast to cloak after the cast); the cloak then guards against \`warlock.carrying\`. Wrong when every incoming item says too late.",
+        "dash_left": "Dash to the demon's left. Right when an item in \`between.incomingToDemon\` arrives imminent or in about half a second and its \`cloakCanBlock\` does not start with yes, and \`demon.openSides\` says left is open.",
+        "wait": "Keep moving, don't cast. Right when nothing is incoming and \`demon.canCast\` does not start with now.",
+      },
+      "instructions": "You control \`demon\`, a mage dueling \`warlock\` in a round arena; a round is won by bringing the other to zero health (\`round\` has the score). What should the demon do right now? A dash keeps a raised cloak up and breaks off an earthspike charge.",
+      "type": "choice",
+    },
+    "demon_aim": {
+      "criteria": {
+        "lead_warlock_movement": "Aim ahead of the warlock. Right when \`warlock.movement\` is walking, strafing or dashing.",
+        "straight_at_warlock": "Aim where the warlock is now. Right when \`warlock.movement\` is standing still or \`warlock.status\` says rooted or frozen.",
+      },
+      "instructions": "If the demon casts now, where should it aim?",
+      "type": "choice",
+    },
+    "demon_move": {
+      "criteria": {
+        "advance": "Walk toward the warlock. Right when \`between.distance\` is far, or \`round\` says the demon is ahead on health, or \`warlock.health\` is critical.",
+        "back_off": "Walk away from the warlock. Right when \`between.distance\` is close, \`demon.health\` is critical, or most spells are in \`demon.onCooldown\`. Wrong when \`demon.position\` is near the edge.",
+        "hold": "Stand still. Right when \`between.distance\` is mid and nothing is incoming, or while a cloak that blocks what is incoming is up.",
+        "strafe_left": "Sidestep to the demon's left. Right when \`between.warlockAim\` is straight at or near the demon, or something is in \`between.incomingToDemon\`, and \`demon.openSides\` says left is open.",
+        "strafe_right": "Sidestep to the demon's right. Right when \`between.warlockAim\` is straight at or near the demon, or something is in \`between.incomingToDemon\`, and \`demon.openSides\` says right is open.",
+      },
+      "instructions": "How should the demon move next? Keep away from the edge, where dodges run out.",
+      "type": "choice",
+    },
+    "demon_spell": {
+      "criteria": {
+        "earth": "Carry earth: the heaviest hit, along a line after a short charge that roots the demon; best when the warlock is frozen, rooted or standing still. Right when \`counters.warlockWeakTo\` is earth and earth is ready, or to cloak against incoming earth. Wrong when \`counters.riskyForDemonToCarry\` is earth, unless cloaking. Wrong for casting when \`counters.warlockCloakBlocks\` is earth.",
+        "fire": "Carry fire: a slow orb whose splash and burn still catch a late dodge. Right when \`counters.warlockWeakTo\` is fire and fire is ready, or to cloak against incoming fire. Wrong when \`counters.riskyForDemonToCarry\` is fire, unless cloaking. Wrong for casting when \`counters.warlockCloakBlocks\` is fire.",
+        "frost": "Carry frost: the fastest shot; a hit freezes the warlock for about a second, long enough for an earthspike to land. Right when \`counters.warlockWeakTo\` is frost and frost is ready, or to cloak against incoming frost. Wrong when \`counters.riskyForDemonToCarry\` is frost, unless cloaking. Wrong for casting when \`counters.warlockCloakBlocks\` is frost.",
+      },
+      "instructions": "Which spell should the demon carry? It casts only the carried spell, and its cloak blocks only that element. Fire beats frost, frost beats earth, earth beats fire: an attack hits 1.5× harder on a mage carrying what it beats (\`counters\` works this out).",
+      "type": "choice",
+    },
+  },
+  "state": {
+    "between": {
+      "distance": "mid",
+      "incomingToDemon": [
+        {
+          "arrives": "in about half a second",
+          "cloakCanBlock": "yes, if it cloaks now (switching to fire costs no time)",
+          "element": "fire",
+        },
+      ],
+      "warlockAim": "straight at the demon",
+    },
+    "counters": {
+      "demonHasWarlockWeaknessReady": "no",
+      "riskyForDemonToCarry": "frost",
+      "warlockCloakBlocks": "nothing",
+      "warlockWeakTo": "earth",
+    },
+    "demon": {
+      "canCast": "now (frost)",
+      "carrying": "frost",
+      "cloak": "no cloak up",
+      "health": "healthy",
+      "onCooldown": [
+        "earth",
+      ],
+      "openSides": "left is open; right is near the arena edge",
+      "position": "near the edge",
+    },
+    "round": "round 2 of 5; warlock leads 1–0; demon ahead on health",
+    "warlock": {
+      "carrying": "fire",
+      "cloak": "no cloak up",
+      "health": "hurt",
+      "movement": "strafing to their left",
+      "openings": "just cast, so it can't cast again yet",
+      "status": "normal",
+    },
+  },
+}
+`;
