@@ -1,4 +1,8 @@
+
 # Jevcaster
+
+
+https://github.com/user-attachments/assets/f6c0442b-4d50-452f-86b0-2feade5f61d2
 
 A browser duel: Warlock Jev against Demon Jev, both controlled in real time by TypeSafe's **Jev** model.
 Both mages have the same kit: three spells in a counter triangle (fire beats frost, frost beats earth, earth beats fire),
