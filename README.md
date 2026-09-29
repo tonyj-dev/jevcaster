@@ -19,15 +19,6 @@ pnpm brain:probe --dry-run   # print the exact request Jev receives, without cal
 `F1` switches the demon's brain (Jev, heuristic, random). The brain inspector (Jev's last answers, latency, spend) starts open;
 its tabs pick the Jev, `×` or `F2` hides it. `F3` switches to watching the shared Jev vs Jev duel that the server runs.
 
-### Sharing it
-
-`pnpm build && pnpm serve` is the public version, safe to put behind a link (on port `PORT`, default 4173).
-It only shows the shared Jev vs Jev duel, with the Live panel and the brain inspector, and none of the dev tools:
-no local play, no `/api/brain` (visitors can't spend the key) and no tunables. What Jev costs doesn't depend
-on how many people watch, and the duel stops when the last viewer leaves. The duel socket is compressed,
-but each viewer still receives a step 60 times a second, so host it somewhere with decent upload (a small VPS behind
-Caddy for HTTPS, or `cloudflared tunnel --url http://localhost:4173` for a quick try from your own machine).
-
 ## How Jev plays
 
 Each Jev plays one mage. About five times a second, the game asks Jev what that mage should do next. Every tick goes through three steps:
@@ -188,6 +179,16 @@ All the thresholds live in [`src/config.ts`](src/config.ts) under `brain`. On th
 | `src/render/`, `src/ui/`, `src/input/` | three.js scene and effects, HUD and inspector, keyboard and mouse |
 | `server/` | The `/api/brain` proxy (the only place that holds the API key) and the Jev vs Jev WebSocket host |
 | `scripts/` | `brain:probe` (latency and answers from the real model), `brain:size` (request size) |
+
+
+### Sharing it
+
+`pnpm build && pnpm serve` is the public version, safe to put behind a link (on port `PORT`, default 4173).
+It only shows the shared Jev vs Jev duel, with the Live panel and the brain inspector, and none of the dev tools:
+no local play, no `/api/brain` (visitors can't spend the key) and no tunables. What Jev costs doesn't depend
+on how many people watch, and the duel stops when the last viewer leaves. The duel socket is compressed,
+but each viewer still receives a step 60 times a second, so host it somewhere with decent upload (a small VPS behind
+Caddy for HTTPS, or `cloudflared tunnel --url http://localhost:4173` for a quick try from your own machine).
 
 Jev calls cost money ($0.042 per million input tokens, about 1.9k tokens per tick). The proxy enforces a per-minute token budget
 (`TYPESAFE_MAX_TOKENS_PER_MINUTE`).
